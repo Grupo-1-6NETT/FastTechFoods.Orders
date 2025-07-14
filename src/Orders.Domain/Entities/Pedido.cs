@@ -32,8 +32,36 @@ public class Pedido
         JustificativaCancelamento = justificativa;
     }
 
-    public void Confirmar() => Status = StatusPedido.Confirmado;
-    public void Rejeitar() => Status = StatusPedido.Rejeitado;
-    public void Preparar() => Status = StatusPedido.EmPreparacao;
-    public void Finalizar() => Status = StatusPedido.Finalizado;
+    public void AlterarStatus(StatusPedido novoStatus)
+    {
+        switch (novoStatus)
+        {
+            case StatusPedido.Confirmado:
+                if (Status != StatusPedido.Criado && Status != StatusPedido.AguardandoConfirmacao)
+                    throw new InvalidOperationException("Pedido não pode ser confirmado nesse estado.");
+                Status = StatusPedido.Confirmado;
+                break;
+
+            case StatusPedido.Rejeitado:
+                if (Status != StatusPedido.Criado && Status != StatusPedido.AguardandoConfirmacao)
+                    throw new InvalidOperationException("Pedido não pode ser rejeitado nesse estado.");
+                Status = StatusPedido.Rejeitado;
+                break;
+
+            case StatusPedido.EmPreparacao:
+                if (Status != StatusPedido.Confirmado)
+                    throw new InvalidOperationException("Pedido só pode ir para preparo se estiver confirmado.");
+                Status = StatusPedido.EmPreparacao;
+                break;
+
+            case StatusPedido.Finalizado:
+                if (Status != StatusPedido.EmPreparacao)
+                    throw new InvalidOperationException("Pedido só pode ser finalizado após o preparo.");
+                Status = StatusPedido.Finalizado;
+                break;
+
+            default:
+                throw new InvalidOperationException("Status inválido para transição.");
+        }
+    }
 }

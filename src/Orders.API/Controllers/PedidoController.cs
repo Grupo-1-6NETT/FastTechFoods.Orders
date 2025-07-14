@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Orders.Application.Commands;
 using Orders.Application.DTOs;
 using Orders.Application.Queries;
+using Orders.Domain.Enums;
 
 namespace Orders.API.Controllers;
 [Route("[controller]")]
@@ -45,5 +46,32 @@ public class PedidoController : ControllerBase
 
         var sucesso = await _mediator.Send(new CancelarPedidoCommand(id, justificativa));
         return sucesso ? Ok("Pedido cancelado") : BadRequest("Não foi possível cancelar o pedido");
+    }
+    [HttpPut("{id}/confirmar")]
+    public async Task<IActionResult> Confirmar(Guid id)
+    {
+        var sucesso = await _mediator.Send(new AtualizarStatusPedidoCommand(id, StatusPedido.Confirmado));
+        return sucesso ? Ok("Pedido confirmado") : BadRequest("Erro ao confirmar pedido");
+    }
+
+    [HttpPut("{id}/rejeitar")]
+    public async Task<IActionResult> Rejeitar(Guid id)
+    {
+        var sucesso = await _mediator.Send(new AtualizarStatusPedidoCommand(id, StatusPedido.Rejeitado));
+        return sucesso ? Ok("Pedido rejeitado") : BadRequest("Erro ao rejeitar pedido");
+    }
+
+    [HttpPut("{id}/preparar")]
+    public async Task<IActionResult> Preparar(Guid id)
+    {
+        var sucesso = await _mediator.Send(new AtualizarStatusPedidoCommand(id, StatusPedido.EmPreparacao));
+        return sucesso ? Ok("Pedido em preparo") : BadRequest("Erro ao preparar pedido");
+    }
+
+    [HttpPut("{id}/finalizar")]
+    public async Task<IActionResult> Finalizar(Guid id)
+    {
+        var sucesso = await _mediator.Send(new AtualizarStatusPedidoCommand(id, StatusPedido.Finalizado));
+        return sucesso ? Ok("Pedido finalizado") : BadRequest("Erro ao finalizar pedido");
     }
 }
