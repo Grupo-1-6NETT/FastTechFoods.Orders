@@ -20,8 +20,15 @@ public class PedidoController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CriarPedido([FromBody] CriarPedidoDTO dto)
     {
-        var id = await _mediator.Send(new CriarPedidoCommand(dto));
-        return CreatedAtAction(nameof(GetById), new { id }, new { id });
+        try
+        {
+            var pedido = await _mediator.Send(new CriarPedidoCommand(dto));
+            return CreatedAtAction(nameof(GetById), new { id = pedido.Id }, pedido);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { erro = ex.Message });
+        }
     }
 
     [HttpGet("{id:guid}")]
