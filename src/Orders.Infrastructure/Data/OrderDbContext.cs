@@ -4,7 +4,12 @@ using Orders.Domain.Entities;
 namespace Orders.Infrastructure.Data;
 public class OrderDbContext : DbContext
 {
+    public OrderDbContext(DbContextOptions options) : base(options)
+    {
+    }
     public DbSet<Pedido> Pedidos { get; set; }
+
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Pedido>(builder =>
