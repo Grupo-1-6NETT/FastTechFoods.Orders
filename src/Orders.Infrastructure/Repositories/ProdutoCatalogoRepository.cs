@@ -12,7 +12,13 @@ internal class ProdutoCatalogoRepository : IProdutoCatalogoRepository
     {
         _dbContext = dbContext;
     }
-
+    public async Task<IEnumerable<ProdutoCatalogo>> ObterTodosAsync()
+    {
+        return await _dbContext.ProdutosCatalogo
+            .AsNoTracking()
+            .Take(100)
+            .ToListAsync();
+    }
     public async Task AdicionarAsync(ProdutoCatalogo produto)
     {
         await _dbContext.ProdutosCatalogo.AddAsync(produto);
@@ -30,4 +36,5 @@ internal class ProdutoCatalogoRepository : IProdutoCatalogoRepository
             .AsNoTracking()
             .FirstOrDefaultAsync(p => p.Id == id);
     }
+
 }
