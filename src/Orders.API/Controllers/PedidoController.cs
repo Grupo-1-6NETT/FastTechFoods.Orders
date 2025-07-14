@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Orders.Application.Commands;
 using Orders.Application.DTOs;
@@ -18,6 +19,7 @@ public class PedidoController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "cliente")]
     public async Task<IActionResult> CriarPedido([FromBody] CriarPedidoDTO dto)
     {
         try
@@ -31,21 +33,8 @@ public class PedidoController : ControllerBase
         }
     }
 
-    [HttpGet("{id:guid}")]
-    public async Task<IActionResult> GetById(Guid id)
-    {
-        var pedido = await _mediator.Send(new ObterPedidoPorIdQuery(id));
-        return pedido is not null ? Ok(pedido) : NotFound("Pedido não encontrado");
-    }
-
-    [HttpGet("cliente/{clienteId}")]
-    public async Task<IActionResult> GetByCliente(Guid clienteId)
-    {
-        var pedidos = await _mediator.Send(new ObterPedidosPorClienteQuery(clienteId));
-        return Ok(pedidos);
-    }
-
     [HttpDelete("{id:guid}")]
+    [Authorize(Roles = "cliente")]
     public async Task<IActionResult> Cancelar(Guid id, [FromQuery] string justificativa)
     {
         if (string.IsNullOrWhiteSpace(justificativa))
@@ -54,7 +43,24 @@ public class PedidoController : ControllerBase
         var sucesso = await _mediator.Send(new CancelarPedidoCommand(id, justificativa));
         return sucesso ? Ok("Pedido cancelado") : BadRequest("Não foi possível cancelar o pedido");
     }
+    [HttpGet("{id:guid}")]
+    [Authorize(Roles = "cliente,gerente,atendente")]
+    public async Task<IActionResult> GetById(Guid id)
+    {
+        var pedido = await _mediator.Send(new ObterPedidoPorIdQuery(id));
+        return pedido is not null ? Ok(pedido) : NotFound("Pedido não encontrado");
+    }
+
+    [HttpGet("cliente/{clienteId}")]
+    [Authorize(Roles = "cliente,gerente,atendente")]
+    public async Task<IActionResult> GetByCliente(Guid clienteId)
+    {
+        var pedidos = await _mediator.Send(new ObterPedidosPorClienteQuery(clienteId));
+        return Ok(pedidos);
+    }
+
     [HttpPut("{id}/confirmar")]
+    [Authorize(Roles = "atendente")]
     public async Task<IActionResult> Confirmar(Guid id)
     {
         var sucesso = await _mediator.Send(new AtualizarStatusPedidoCommand(id, StatusPedido.Confirmado));
@@ -62,6 +68,7 @@ public class PedidoController : ControllerBase
     }
 
     [HttpPut("{id}/rejeitar")]
+    [Authorize(Roles = "atendente")]
     public async Task<IActionResult> Rejeitar(Guid id)
     {
         var sucesso = await _mediator.Send(new AtualizarStatusPedidoCommand(id, StatusPedido.Rejeitado));
@@ -69,6 +76,7 @@ public class PedidoController : ControllerBase
     }
 
     [HttpPut("{id}/preparar")]
+    [Authorize(Roles = "atendente")]
     public async Task<IActionResult> Preparar(Guid id)
     {
         var sucesso = await _mediator.Send(new AtualizarStatusPedidoCommand(id, StatusPedido.EmPreparacao));
@@ -76,6 +84,7 @@ public class PedidoController : ControllerBase
     }
 
     [HttpPut("{id}/finalizar")]
+    [Authorize(Roles = "atendente")]
     public async Task<IActionResult> Finalizar(Guid id)
     {
         var sucesso = await _mediator.Send(new AtualizarStatusPedidoCommand(id, StatusPedido.Finalizado));
