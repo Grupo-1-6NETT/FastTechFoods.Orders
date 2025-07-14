@@ -38,9 +38,9 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo
     {
-        Title = "FastTechFoods Auth API",
+        Title = "FastTechFoods Orders API",
         Version = "v1",
-        Description = "API de autenticação para o sistema FastTechFoods"
+        Description = "API de Gestão de pedidos do sistema FastTechFoods"
     });
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
