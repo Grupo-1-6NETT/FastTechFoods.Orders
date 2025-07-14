@@ -1,6 +1,8 @@
-﻿using MediatR;
+﻿using MassTransit;
+using MediatR;
 using Orders.Application.DTOs;
 using Orders.Domain.Entities;
+using Orders.Domain.Events;
 using Orders.Domain.Repositories;
 
 namespace Orders.Application.Commands;
@@ -11,12 +13,14 @@ public class CriarPedidoCommandHandler : IRequestHandler<CriarPedidoCommand, Ped
     private readonly IPedidoRepository _pedidoRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IProdutoCatalogoRepository _produtoRepository;
+    private readonly IPublishEndpoint _publish;
 
-    public CriarPedidoCommandHandler(IPedidoRepository pedidoRepository, IUnitOfWork unitOfWork, IProdutoCatalogoRepository produtoRepository)
+    public CriarPedidoCommandHandler(IPedidoRepository pedidoRepository, IUnitOfWork unitOfWork, IProdutoCatalogoRepository produtoRepository, IPublishEndpoint publish)
     {
         _pedidoRepository = pedidoRepository;
         _unitOfWork = unitOfWork;
         _produtoRepository = produtoRepository;
+        _publish = publish;
     }
 
     public async Task<PedidoOutputDTO> Handle(CriarPedidoCommand request, CancellationToken cancellationToken)
@@ -38,6 +42,15 @@ public class CriarPedidoCommandHandler : IRequestHandler<CriarPedidoCommand, Ped
 
         await _pedidoRepository.AdicionarAsync(pedido);
         await _unitOfWork.CommitAsync();
+
+        await _publish.Publish<IPedidoCriadoEvent>(new
+        {
+            PedidoId = pedido.Id,
+            ClienteId = pedido.ClienteId,
+            DataCriacao = pedido.DataCriacao,
+            Total = pedido.CalcularTotal(),
+            Itens = pedido.Itens.Select(i => new ItemPedidoEventModel(i.ProdutoId, i.NomeProduto, i.Quantidade, i.PrecoUnitario))
+        });
 
         return new PedidoOutputDTO(
             pedido.Id,
