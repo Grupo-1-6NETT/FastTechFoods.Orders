@@ -18,9 +18,10 @@ internal class PedidoRepository : IPedidoRepository
         await _dbContext.Pedidos.AddAsync(pedido);
     }
 
-    public async Task AtualizarAsync(Pedido pedido)
+    public Task AtualizarAsync(Pedido pedido)
     {
         _dbContext.Pedidos.Update(pedido);
+        return Task.CompletedTask;
     }
 
     public async Task<Pedido?> ObterPorIdAsync(Guid id)

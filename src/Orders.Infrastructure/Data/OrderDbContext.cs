@@ -8,6 +8,7 @@ public class OrderDbContext : DbContext
     {
     }
     public DbSet<Pedido> Pedidos { get; set; }
+    public DbSet<ProdutoCatalogo> ProdutosCatalogo => Set<ProdutoCatalogo>();
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -30,6 +31,13 @@ public class OrderDbContext : DbContext
                 itens.Property(i => i.PrecoUnitario).HasColumnType("decimal(10,2)");
                 itens.Property(i => i.Quantidade).IsRequired();
             });
+        });
+        modelBuilder.Entity<ProdutoCatalogo>(builder =>
+        {
+            builder.HasKey(p => p.Id);
+            builder.Property(p => p.Nome).IsRequired().HasMaxLength(100);
+            builder.Property(p => p.Categoria).IsRequired().HasMaxLength(100);
+            builder.Property(p => p.Preco).HasColumnType("decimal(10,2)");
         });
     }
 
