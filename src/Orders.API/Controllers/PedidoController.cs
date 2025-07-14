@@ -35,7 +35,7 @@ public class PedidoController : ControllerBase
     public async Task<IActionResult> GetById(Guid id)
     {
         var pedido = await _mediator.Send(new ObterPedidoPorIdQuery(id));
-        return pedido is not null ? Ok(pedido) : NotFound();
+        return pedido is not null ? Ok(pedido) : NotFound("Pedido não encontrado");
     }
 
     [HttpGet("cliente/{clienteId}")]
