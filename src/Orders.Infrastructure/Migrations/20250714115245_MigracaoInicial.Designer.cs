@@ -12,7 +12,7 @@ using Orders.Infrastructure.Data;
 namespace Orders.Infrastructure.Migrations
 {
     [DbContext(typeof(OrderDbContext))]
-    [Migration("20250714015258_MigracaoInicial")]
+    [Migration("20250714115245_MigracaoInicial")]
     partial class MigracaoInicial
     {
         /// <inheritdoc />
@@ -53,7 +53,6 @@ namespace Orders.Infrastructure.Migrations
                     b.OwnsMany("Orders.Domain.Entities.ItemPedido", "Itens", b1 =>
                         {
                             b1.Property<Guid>("Id")
-                                .ValueGeneratedOnAdd()
                                 .HasColumnType("uuid");
 
                             b1.Property<string>("NomeProduto")

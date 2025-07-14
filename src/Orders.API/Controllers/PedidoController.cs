@@ -23,7 +23,7 @@ public class PedidoController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id }, new { id });
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id)
     {
         var pedido = await _mediator.Send(new ObterPedidoPorIdQuery(id));
@@ -35,5 +35,15 @@ public class PedidoController : ControllerBase
     {
         var pedidos = await _mediator.Send(new ObterPedidosPorClienteQuery(clienteId));
         return Ok(pedidos);
+    }
+
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> Cancelar(Guid id, [FromQuery] string justificativa)
+    {
+        if (string.IsNullOrWhiteSpace(justificativa))
+            return BadRequest("Justificativa é obrigatória");
+
+        var sucesso = await _mediator.Send(new CancelarPedidoCommand(id, justificativa));
+        return sucesso ? Ok("Pedido cancelado") : BadRequest("Não foi possível cancelar o pedido");
     }
 }

@@ -50,7 +50,6 @@ namespace Orders.Infrastructure.Migrations
                     b.OwnsMany("Orders.Domain.Entities.ItemPedido", "Itens", b1 =>
                         {
                             b1.Property<Guid>("Id")
-                                .ValueGeneratedOnAdd()
                                 .HasColumnType("uuid");
 
                             b1.Property<string>("NomeProduto")

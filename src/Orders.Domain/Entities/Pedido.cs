@@ -25,6 +25,9 @@ public class Pedido
 
     public void Cancelar(string justificativa)
     {
+        if (Status != StatusPedido.Criado && Status != StatusPedido.AguardandoConfirmacao)
+            throw new InvalidOperationException("Pedido não pode ser cancelado nesse estado.");
+
         Status = StatusPedido.Cancelado;
         JustificativaCancelamento = justificativa;
     }

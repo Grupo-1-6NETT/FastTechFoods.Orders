@@ -1,6 +1,7 @@
 ﻿namespace Orders.Domain.Entities;
 public class ItemPedido
 {
+    public Guid Id { get; private set; } = Guid.NewGuid();
     public Guid ProdutoId { get; private set; }
     public string NomeProduto { get; private set; } = string.Empty;
     public decimal PrecoUnitario { get; private set; }

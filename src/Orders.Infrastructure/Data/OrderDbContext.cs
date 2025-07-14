@@ -21,8 +21,11 @@ public class OrderDbContext : DbContext
             builder.OwnsMany(p => p.Itens, itens =>
             {
                 itens.WithOwner().HasForeignKey("PedidoId");
-                itens.Property<Guid>("Id");
-                itens.HasKey("Id");
+
+                itens.HasKey(i => i.Id); 
+                itens.Property(i => i.Id).ValueGeneratedNever();
+
+                itens.Property(i => i.ProdutoId).IsRequired();
                 itens.Property(i => i.NomeProduto).IsRequired();
                 itens.Property(i => i.PrecoUnitario).HasColumnType("decimal(10,2)");
                 itens.Property(i => i.Quantidade).IsRequired();
