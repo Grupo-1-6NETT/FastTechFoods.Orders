@@ -1,4 +1,5 @@
 ﻿using MassTransit;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Orders.Application.Commands;
 using Orders.Application.Consumer;
@@ -6,10 +7,10 @@ using Orders.Application.Consumer;
 namespace Orders.Application.DependencyInjection;
 public static class DependencyInjection
 {
-    public static IServiceCollection AddApplicationDI(this IServiceCollection services)
+    public static IServiceCollection AddApplicationDI(this IServiceCollection services, IConfiguration config)
     {
         AddMediatr(services);
-        AddMasstransit(services);
+        AddMasstransit(services, config);
 
         return services;
     }
@@ -22,7 +23,7 @@ public static class DependencyInjection
         });
 
     }
-    private static void AddMasstransit(IServiceCollection services)
+    private static void AddMasstransit(IServiceCollection services, IConfiguration config)
     {
         services.AddMassTransit(x =>
         {
@@ -31,8 +32,8 @@ public static class DependencyInjection
             {
                 cfg.Host("localhost", "/", h =>
                 {
-                    h.Username("guest");
-                    h.Password("guest");
+                    h.Username(config["RabbitMQSettings:Username"]!);
+                    h.Password(config["RabbitMQSettings:Password"]!);
                 });
 
                 cfg.ReceiveEndpoint("produto-cadastrado-event", e =>
