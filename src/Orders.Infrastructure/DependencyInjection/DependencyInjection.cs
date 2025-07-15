@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Orders.Domain.Repositories;
 using Orders.Infrastructure.Data;
 using Orders.Infrastructure.Repositories;
@@ -14,6 +15,25 @@ public static class DependencyInjection
         AddRepositories(services);
 
         return services;
+    }
+
+    public static IHost ApplyMigrations(this IHost app)
+    {
+        using (var scope = app.Services.CreateScope())
+        {
+            var servicesProvider = scope.ServiceProvider;
+            var dbContext = servicesProvider.GetRequiredService<OrderDbContext>();
+            try
+            {
+                if (dbContext.Database.GetPendingMigrations().Any())
+                    dbContext.Database.Migrate();
+            }
+            catch (System.Exception ex)
+            {
+                Console.WriteLine($"Falha ao conectar com banco de dados | {ex.Message}");
+            }
+        }
+        return app;
     }
 
     private static void AddDbContext(IServiceCollection services, IConfiguration config)
