@@ -30,7 +30,7 @@ public static class DependencyInjection
             x.AddConsumer<ProdutoCadastradoConsumer>();
             x.UsingRabbitMq((ctx, cfg) =>
             {
-                cfg.Host("localhost", "/", h =>
+                cfg.Host("rabbitmq", "/", h =>
                 {
                     h.Username(config["RabbitMQSettings:Username"]!);
                     h.Password(config["RabbitMQSettings:Password"]!);
