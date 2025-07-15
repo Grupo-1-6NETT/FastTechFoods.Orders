@@ -9,7 +9,7 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddInfrastructureDI(builder.Configuration);
-builder.Services.AddApplicationDI();
+builder.Services.AddApplicationDI(builder.Configuration);
 
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 
