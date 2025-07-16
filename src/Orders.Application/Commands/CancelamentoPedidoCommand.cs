@@ -1,5 +1,4 @@
 ﻿using MassTransit;
-using MassTransit.Transports;
 using MediatR;
 using Orders.Domain.Events;
 using Orders.Domain.Repositories;
