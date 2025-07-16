@@ -1,0 +1,38 @@
+name: CI - FastTechFoods.Orders
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Restorar dependencias
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --no-restore --configuration Release
+
+      - name: Testes
+        run: dotnet test --no-build --configuration Release
+
+      # - name: Login no DockerHub
+      #   run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+
+      # - name: Docker Build
+      #   run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/fasttechfoods-orders:latest .
+
+      # - name: Docker Push
+      #   run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/fasttechfoods-orders:latest
