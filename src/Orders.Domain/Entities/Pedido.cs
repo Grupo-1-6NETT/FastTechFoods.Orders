@@ -26,7 +26,7 @@ public class Pedido
 
     public void Cancelar(string justificativa)
     {
-        if (Status != StatusPedido.Criado && Status != StatusPedido.AguardandoConfirmacao)
+        if (Status != StatusPedido.Criado && Status != StatusPedido.Confirmado)
             throw new InvalidOperationException("Pedido não pode ser cancelado nesse estado.");
 
         Status = StatusPedido.Cancelado;
@@ -38,13 +38,13 @@ public class Pedido
         switch (novoStatus)
         {
             case StatusPedido.Confirmado:
-                if (Status != StatusPedido.Criado && Status != StatusPedido.AguardandoConfirmacao)
+                if (Status != StatusPedido.Criado )
                     throw new InvalidOperationException("Pedido não pode ser confirmado nesse estado.");
                 Status = StatusPedido.Confirmado;
                 break;
 
             case StatusPedido.Rejeitado:
-                if (Status != StatusPedido.Criado && Status != StatusPedido.AguardandoConfirmacao)
+                if (Status != StatusPedido.Confirmado && Status != StatusPedido.EmPreparacao)
                     throw new InvalidOperationException("Pedido não pode ser rejeitado nesse estado.");
                 Status = StatusPedido.Rejeitado;
                 break;
