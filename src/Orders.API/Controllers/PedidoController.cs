@@ -53,7 +53,7 @@ public class PedidoController : ControllerBase
     /// <response code="200">Lista de pedidos</response>
     /// <response code="401">Usuário não autenticado</response>    
     /// <response code="500">Erro inesperado</response>
-    [HttpGet("pedidos")]
+    [HttpGet()]
     [Authorize(Roles = "cliente")]
     public async Task<IActionResult> GetByCliente()
     {
@@ -82,9 +82,9 @@ public class PedidoController : ControllerBase
     /// <response code="400">Falha no processo</response>
     /// <response code="401">Cliente não autenticado</response>    
     /// <response code="500">Erro inesperado</response>
-    [HttpPost]
+    [HttpPost("{PedidoId:guid}")]
     [Authorize(Roles = "cliente")]
-    public async Task<IActionResult> AlterarPedido([FromBody] Guid PedidoId, CriarPedidoDTO dto)
+    public async Task<IActionResult> AlterarPedido(Guid PedidoId, [FromBody] CriarPedidoDTO dto)
     {
         try
         {
@@ -106,6 +106,11 @@ public class PedidoController : ControllerBase
     /// <summary>
     /// Confirma o pedido e envia para cozinha
     /// </summary>
+    /// <remarks>   
+    ///         
+    /// Forma de entrega: Balcão = 0, Drive-Thru = 1, Delivery = 2  
+    ///         
+    /// </remarks>      
     /// <param name="id">ID do pedido</param>
     /// <param name="formaDeEntrega">Forma de entrega</param>
     /// <returns>Status do processo</returns>
@@ -115,7 +120,7 @@ public class PedidoController : ControllerBase
     /// <response code="500">Erro inesperado</response>
     [HttpPut("{id}/confirmar")]
     [Authorize(Roles = "cliente")]
-    public async Task<IActionResult> Confirmar(Guid id, [FromBody]FormaDeEntrega formaDeEntrega)
+    public async Task<IActionResult> Confirmar(Guid id, [FromQuery]FormaDeEntrega formaDeEntrega)
     {
         var sucesso = await _mediator.Send(new ConfirmarPedidoCommand(id, formaDeEntrega));
         return sucesso ? Ok("Pedido confirmado") : BadRequest("Erro ao confirmar pedido");
