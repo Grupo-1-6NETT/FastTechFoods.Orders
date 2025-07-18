@@ -5,20 +5,20 @@ using Orders.Domain.Enums;
 using Orders.Domain.Repositories;
 
 namespace Orders.Application.Consumer;
-public class PedidoRejeitadoConsumer : IConsumer<IPedidoRejeitadoEvent>
+public class PedidoEmPreparoConsumer : IConsumer<IPedidoEmPreparoEvent>
 {
     private readonly IPedidoRepository _repository;
     private readonly IUnitOfWork _unit;
-    private readonly ILogger<PedidoRejeitadoConsumer> _logger;
+    private readonly ILogger<PedidoEmPreparoConsumer> _logger;
 
-    public PedidoRejeitadoConsumer(IPedidoRepository repository, IUnitOfWork unit, ILogger<PedidoRejeitadoConsumer> logger)
+    public PedidoEmPreparoConsumer(IPedidoRepository repository, IUnitOfWork unit, ILogger<PedidoEmPreparoConsumer> logger)
     {
         _repository = repository;
         _unit = unit;
         _logger = logger;
     }
 
-    public async Task Consume(ConsumeContext<IPedidoRejeitadoEvent> context)
+    public async Task Consume(ConsumeContext<IPedidoEmPreparoEvent> context)
     {
         var evento = context.Message;
 
@@ -29,9 +29,9 @@ public class PedidoRejeitadoConsumer : IConsumer<IPedidoRejeitadoEvent>
             return;
         }
 
-        pedido.AlterarStatus(StatusPedido.Rejeitado);
+        pedido.AlterarStatus(StatusPedido.EmPreparacao);
         await _unit.CommitAsync();
 
-        _logger.LogInformation("Pedido cancelado via evento: {Id}| Motivo: {Motivo}", evento.PedidoId, evento.Motivo);
+        _logger.LogInformation("Iniciado preparo do pedido via evento: {Id}", evento.PedidoId);
     }
 }
