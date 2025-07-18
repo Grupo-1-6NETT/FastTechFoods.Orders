@@ -7,23 +7,31 @@ using Orders.Domain.Repositories;
 
 namespace Orders.Application.Commands;
 
-public record CriarPedidoCommand(Guid ClienteId, List<ItemPedidoDTO> Itens) : IRequest<PedidoOutputDTO>;
-public class CriarPedidoCommandHandler : IRequestHandler<CriarPedidoCommand, PedidoOutputDTO>
+public record AtualizarPedidoCommand(Guid ClientId, Guid PedidoId, List<ItemPedidoDTO> Itens) : IRequest<PedidoOutputDTO>;
+public class AtualizarPedidoCommandHandler : IRequestHandler<AtualizarPedidoCommand, PedidoOutputDTO>
 {
     private readonly IPedidoRepository _pedidoRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IProdutoCatalogoRepository _produtoRepository;
 
 
-    public CriarPedidoCommandHandler(IPedidoRepository pedidoRepository, IUnitOfWork unitOfWork, IProdutoCatalogoRepository produtoRepository)
+    public AtualizarPedidoCommandHandler(IPedidoRepository pedidoRepository, IUnitOfWork unitOfWork, IProdutoCatalogoRepository produtoRepository)
     {
         _pedidoRepository = pedidoRepository;
         _unitOfWork = unitOfWork;
         _produtoRepository = produtoRepository;
     }
 
-    public async Task<PedidoOutputDTO> Handle(CriarPedidoCommand request, CancellationToken cancellationToken)
+    public async Task<PedidoOutputDTO> Handle(AtualizarPedidoCommand request, CancellationToken cancellationToken)
     {
+        var pedido = await _pedidoRepository.ObterPorIdAsync(request.PedidoId);
+        if (pedido is null)
+            throw new InvalidOperationException($"Pedido não encontrado.");
+
+        if(pedido.ClienteId != request.ClientId)
+            throw new InvalidOperationException($"Pedido de outro cliente. Sem autorização para alterar.");
+
+
         var itens = new List<ItemPedido>();
 
         foreach (var itemDto in request.Itens)
@@ -35,9 +43,9 @@ public class CriarPedidoCommandHandler : IRequestHandler<CriarPedidoCommand, Ped
             itens.Add(new ItemPedido(produto.Id, produto.Nome, produto.Preco, itemDto.Quantidade));
         }
 
-        var pedido = new Pedido(request.ClienteId, itens);
+        pedido.InserirItens(itens);
 
-        await _pedidoRepository.AdicionarAsync(pedido);
+        await _pedidoRepository.AtualizarAsync(pedido);
         await _unitOfWork.CommitAsync();        
 
         return new PedidoOutputDTO(

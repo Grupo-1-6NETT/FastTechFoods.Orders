@@ -8,6 +8,7 @@ public class Pedido
     public DateTime DataCriacao { get; init; } = DateTime.UtcNow;
     public StatusPedido Status { get; private set; } = StatusPedido.Criado;
     public string? JustificativaCancelamento { get; private set; }
+    public FormaDeEntrega? FormaDeEntrega { get; private set; }
 
     private readonly List<ItemPedido> _itens = new();
     public IReadOnlyCollection<ItemPedido> Itens => _itens;
@@ -63,5 +64,16 @@ public class Pedido
             default:
                 throw new InvalidOperationException("Status inválido para transição.");
         }
+    }
+
+    public void InserirItens(List<ItemPedido> lista)
+    {
+        _itens.Clear();
+        _itens.AddRange(lista);
+    }
+
+    public void EscolherFormaDeEntrega(FormaDeEntrega forma)
+    {
+        FormaDeEntrega = forma;
     }
 }

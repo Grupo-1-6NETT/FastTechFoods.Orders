@@ -5,6 +5,7 @@ public class ProdutoCatalogo
     public string Nome { get; private set; } = string.Empty;
     public string Categoria { get; private set; } = string.Empty;
     public decimal Preco { get; private set; }
+    public bool Disponibilidade { get; private set; } = true;
 
     protected ProdutoCatalogo() { }
 
@@ -16,10 +17,12 @@ public class ProdutoCatalogo
         Preco = preco;
     }
 
-    public void Atualizar(string nome, string categoria, decimal preco)
+
+    public void Atualizar(string nome, string categoria, decimal preco, bool disponibilidade)
     {
         Nome = nome;
         Categoria = categoria;
         Preco = preco;
+        Disponibilidade = disponibilidade;
     }
 }

@@ -7,6 +7,5 @@ public enum StatusPedido
     Rejeitado = 3,
     Cancelado = 4,
     EmPreparacao = 5,
-    Pronto = 6,
-    Finalizado = 7
+    Finalizado = 6
 }

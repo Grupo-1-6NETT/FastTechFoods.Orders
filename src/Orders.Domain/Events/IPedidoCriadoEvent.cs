@@ -7,4 +7,5 @@ public interface IPedidoCriadoEvent
     DateTime DataCriacao { get; }
     decimal Total { get; }
     IEnumerable<ItemPedidoEventModel> Itens { get; }
+    string FormaDeEntrega { get; }
 }

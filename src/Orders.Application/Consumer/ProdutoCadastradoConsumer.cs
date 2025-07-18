@@ -32,7 +32,7 @@ public class ProdutoCadastradoConsumer : IConsumer<IProdutoCadastradoEvent>
         }
         else
         {
-            existente.Atualizar(msg.Nome, msg.Categoria, msg.Preco);
+            existente.Atualizar(msg.Nome, msg.Categoria, msg.Preco, msg.Disponibilidade);
             await _repository.AtualizarAsync(existente);
         }
 

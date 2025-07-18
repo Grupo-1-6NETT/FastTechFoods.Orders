@@ -20,7 +20,7 @@ internal class ProdutoCatalogoRepository : IProdutoCatalogoRepository
             .ToListAsync();
     }
     public async Task AdicionarAsync(ProdutoCatalogo produto)
-    {
+    {        
         await _dbContext.ProdutosCatalogo.AddAsync(produto);
     }
 

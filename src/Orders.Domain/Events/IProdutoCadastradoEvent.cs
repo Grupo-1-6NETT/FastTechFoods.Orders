@@ -5,4 +5,5 @@ public interface IProdutoCadastradoEvent
     string Nome { get; }
     string Categoria { get; }
     decimal Preco { get; }
+    bool Disponibilidade { get; }
 }

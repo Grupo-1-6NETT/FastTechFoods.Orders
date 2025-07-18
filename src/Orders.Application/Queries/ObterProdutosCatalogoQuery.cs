@@ -16,8 +16,9 @@ public class ObterProdutosCatalogoQueryHandler : IRequestHandler<ObterProdutosCa
     public async Task<IEnumerable<ProdutoCatalogoDTO>> Handle(ObterProdutosCatalogoQuery request, CancellationToken cancellationToken)
     {
         var produtos = await _repository.ObterTodosAsync();
+        var produtosDisponiveis = produtos.Where(p => p.Disponibilidade == true);
 
-        return produtos.Select(p => new ProdutoCatalogoDTO(
+        return produtosDisponiveis.Select(p => new ProdutoCatalogoDTO(
             p.Id,
             p.Nome,
             p.Categoria,

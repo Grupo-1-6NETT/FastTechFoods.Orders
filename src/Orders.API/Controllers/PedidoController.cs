@@ -5,6 +5,7 @@ using Orders.Application.Commands;
 using Orders.Application.DTOs;
 using Orders.Application.Queries;
 using Orders.Domain.Enums;
+using System.Security.Claims;
 
 namespace Orders.API.Controllers;
 [Route("[controller]")]
@@ -18,13 +19,25 @@ public class PedidoController : ControllerBase
         _mediator = mediator;
     }
 
+    /// <summary>
+    /// Cria um pedido novo
+    /// </summary>
+    /// <returns>Pedido criado</returns>
+    /// <response code="200">Pedido criado com sucesso</response>
+    /// <response code="401">Cliente não autenticado</response>    
+    /// <response code="500">Erro inesperado</response>
     [HttpPost]
     [Authorize(Roles = "cliente")]
     public async Task<IActionResult> CriarPedido([FromBody] CriarPedidoDTO dto)
     {
         try
         {
-            var pedido = await _mediator.Send(new CriarPedidoCommand(dto));
+            var clienteId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrWhiteSpace(clienteId) || !Guid.TryParse(clienteId, out var clienteGuid))
+                return Unauthorized(new { erro = "Identificação do cliente inválida" });
+
+            var pedido = await _mediator.Send(new CriarPedidoCommand(clienteGuid, dto.Itens));
             return CreatedAtAction(nameof(GetById), new { id = pedido.Id }, pedido);
         }
         catch (InvalidOperationException ex)
@@ -33,16 +46,110 @@ public class PedidoController : ControllerBase
         }
     }
 
-    [HttpDelete("{id:guid}")]
+    /// <summary>
+    /// Consulta pedidos de um cliente
+    /// </summary>
+    /// <returns>Lista de pedidos do cliente</returns>
+    /// <response code="200">Lista de pedidos</response>
+    /// <response code="401">Usuário não autenticado</response>    
+    /// <response code="500">Erro inesperado</response>
+    [HttpGet("pedidos")]
     [Authorize(Roles = "cliente")]
-    public async Task<IActionResult> Cancelar(Guid id, [FromQuery] string justificativa)
+    public async Task<IActionResult> GetByCliente()
+    {
+        try
+        {
+            var clienteId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrWhiteSpace(clienteId) || !Guid.TryParse(clienteId, out var clienteGuid))
+                return Unauthorized(new { erro = "Identificação do cliente inválida" });
+
+            var pedidos = await _mediator.Send(new ObterPedidosPorClienteQuery(clienteGuid));
+            return Ok(pedidos);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { erro = ex.Message });
+        }
+
+    }
+
+    /// <summary>
+    /// Altera itens um pedido novo
+    /// </summary>
+    /// <returns>Pedido alterado</returns>
+    /// <response code="200">Pedido alterado com sucesso</response>
+    /// <response code="400">Falha no processo</response>
+    /// <response code="401">Cliente não autenticado</response>    
+    /// <response code="500">Erro inesperado</response>
+    [HttpPost]
+    [Authorize(Roles = "cliente")]
+    public async Task<IActionResult> AlterarPedido([FromBody] Guid PedidoId, CriarPedidoDTO dto)
+    {
+        try
+        {
+            var clienteId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrWhiteSpace(clienteId) || !Guid.TryParse(clienteId, out var clienteGuid))
+                return Unauthorized(new { erro = "Identificação do cliente inválida" });
+
+            var pedido = await _mediator.Send(new AtualizarPedidoCommand(clienteGuid, PedidoId, dto.Itens));
+            return Ok(pedido);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { erro = ex.Message });
+        }
+    }
+
+
+    /// <summary>
+    /// Confirma o pedido e envia para cozinha
+    /// </summary>
+    /// <param name="id">ID do pedido</param>
+    /// <param name="formaDeEntrega">Forma de entrega</param>
+    /// <returns>Status do processo</returns>
+    /// <response code="200">Pedido confirmado</response>
+    /// <response code="400">Erro ao confirmar pedido</response>
+    /// <response code="401">Funcionário não autenticado</response>    
+    /// <response code="500">Erro inesperado</response>
+    [HttpPut("{id}/confirmar")]
+    [Authorize(Roles = "cliente")]
+    public async Task<IActionResult> Confirmar(Guid id, [FromBody]FormaDeEntrega formaDeEntrega)
+    {
+        var sucesso = await _mediator.Send(new ConfirmarPedidoCommand(id, formaDeEntrega));
+        return sucesso ? Ok("Pedido confirmado") : BadRequest("Erro ao confirmar pedido");
+    }
+
+    /// <summary>
+    /// Cancela um pedido não iniciado preparo
+    /// </summary>
+    /// <param name="idPedido">ID pedido</param>
+    /// <param name="justificativa">Justificativa do cancelamento</param>
+    /// <returns>O token de autenticação da API</returns>
+    /// <response code="200">Token gerado com sucesso</response>
+    /// <response code="401">Funcionário não autenticado</response>    
+    /// <response code="500">Erro inesperado</response>
+    [HttpDelete()]
+    [Authorize(Roles = "cliente")]
+    public async Task<IActionResult> Cancelar([FromQuery] Guid idPedido, string justificativa)
     {
         if (string.IsNullOrWhiteSpace(justificativa))
             return BadRequest("Justificativa é obrigatória");
 
-        var sucesso = await _mediator.Send(new CancelarPedidoCommand(id, justificativa));
+        var sucesso = await _mediator.Send(new CancelarPedidoCommand(idPedido, justificativa));
         return sucesso ? Ok("Pedido cancelado") : BadRequest("Não foi possível cancelar o pedido");
     }
+
+    /// <summary>
+    /// Localiza pedido informando ID
+    /// </summary>
+    /// <param name="id">ID pedido</param>
+    /// <returns>Informação do pedido</returns>
+    /// <response code="200">Pedido</response>
+    /// <response code="404">Pedido não encontrado</response>
+    /// <response code="401">Usuário não autenticado</response>    
+    /// <response code="500">Erro inesperado</response>
     [HttpGet("{id:guid}")]
     [Authorize(Roles = "cliente,gerente,atendente")]
     public async Task<IActionResult> GetById(Guid id)
@@ -51,43 +158,5 @@ public class PedidoController : ControllerBase
         return pedido is not null ? Ok(pedido) : NotFound("Pedido não encontrado");
     }
 
-    [HttpGet("cliente/{clienteId}")]
-    [Authorize(Roles = "cliente,gerente,atendente")]
-    public async Task<IActionResult> GetByCliente(Guid clienteId)
-    {
-        var pedidos = await _mediator.Send(new ObterPedidosPorClienteQuery(clienteId));
-        return Ok(pedidos);
-    }
 
-    [HttpPut("{id}/confirmar")]
-    [Authorize(Roles = "atendente")]
-    public async Task<IActionResult> Confirmar(Guid id)
-    {
-        var sucesso = await _mediator.Send(new AtualizarStatusPedidoCommand(id, StatusPedido.Confirmado));
-        return sucesso ? Ok("Pedido confirmado") : BadRequest("Erro ao confirmar pedido");
-    }
-
-    [HttpPut("{id}/rejeitar")]
-    [Authorize(Roles = "atendente")]
-    public async Task<IActionResult> Rejeitar(Guid id)
-    {
-        var sucesso = await _mediator.Send(new AtualizarStatusPedidoCommand(id, StatusPedido.Rejeitado));
-        return sucesso ? Ok("Pedido rejeitado") : BadRequest("Erro ao rejeitar pedido");
-    }
-
-    [HttpPut("{id}/preparar")]
-    [Authorize(Roles = "atendente")]
-    public async Task<IActionResult> Preparar(Guid id)
-    {
-        var sucesso = await _mediator.Send(new AtualizarStatusPedidoCommand(id, StatusPedido.EmPreparacao));
-        return sucesso ? Ok("Pedido em preparo") : BadRequest("Erro ao preparar pedido");
-    }
-
-    [HttpPut("{id}/finalizar")]
-    [Authorize(Roles = "atendente")]
-    public async Task<IActionResult> Finalizar(Guid id)
-    {
-        var sucesso = await _mediator.Send(new AtualizarStatusPedidoCommand(id, StatusPedido.Finalizado));
-        return sucesso ? Ok("Pedido finalizado") : BadRequest("Erro ao finalizar pedido");
-    }
 }
