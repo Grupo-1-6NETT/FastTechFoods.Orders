@@ -36,7 +36,7 @@ public class CriarPedidoCommandHandlerTests
         _produtoRepoMock.Setup(r => r.ObterPorIdAsync(produtoId))
                         .ReturnsAsync(produto);
 
-        var dto = new CriarPedidoDTO(clienteId, new List<ItemPedidoDTO>
+        var dto = new CriarPedidoDTO(new List<ItemPedidoDTO>
         {
             new(produtoId, 2)
         });
@@ -67,7 +67,7 @@ public class CriarPedidoCommandHandlerTests
         _produtoRepoMock.Setup(r => r.ObterPorIdAsync(produtoId))
                         .ReturnsAsync((ProdutoCatalogo?)null);
 
-        var dto = new CriarPedidoDTO(clienteId, new List<ItemPedidoDTO>
+        var dto = new CriarPedidoDTO(new List<ItemPedidoDTO>
         {
             new(produtoId, 1)
         });

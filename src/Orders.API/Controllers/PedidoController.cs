@@ -137,7 +137,7 @@ public class PedidoController : ControllerBase
     /// <response code="500">Erro inesperado</response>
     [HttpDelete()]
     [Authorize(Roles = "cliente")]
-    public async Task<IActionResult> Cancelar([FromQuery] Guid idPedido, string justificativa)
+    public async Task<IActionResult> Cancelar([FromQuery] Guid idPedido, [FromBody]string justificativa)
     {
         if (string.IsNullOrWhiteSpace(justificativa))
             return BadRequest("Justificativa é obrigatória");
