@@ -21,8 +21,7 @@ public class CriarPedidoCommandHandlerTests
         _handler = new CriarPedidoCommandHandler(
             _pedidoRepoMock.Object,
             _unitMock.Object,
-            _produtoRepoMock.Object,
-            _publishMock.Object
+            _produtoRepoMock.Object
         );
     }
 
@@ -42,7 +41,7 @@ public class CriarPedidoCommandHandlerTests
             new(produtoId, 2)
         });
 
-        var command = new CriarPedidoCommand(dto);
+        var command = new CriarPedidoCommand(clienteId, dto.Itens);
 
         // Act
         var result = await _handler.Handle(command, default);
@@ -55,8 +54,7 @@ public class CriarPedidoCommandHandlerTests
 
         _pedidoRepoMock.Verify(r => r.AdicionarAsync(It.IsAny<Pedido>()), Times.Once);
         _unitMock.Verify(u => u.CommitAsync(), Times.Once);
-        _publishMock.Verify(p => p.Publish<IPedidoCriadoEvent>(
-            It.IsAny<object>(), default), Times.Once);
+
     }
 
     [Fact]
@@ -74,7 +72,7 @@ public class CriarPedidoCommandHandlerTests
             new(produtoId, 1)
         });
 
-        var command = new CriarPedidoCommand(dto);
+        var command = new CriarPedidoCommand(clienteId, dto.Itens);
 
         // Act & Assert
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
