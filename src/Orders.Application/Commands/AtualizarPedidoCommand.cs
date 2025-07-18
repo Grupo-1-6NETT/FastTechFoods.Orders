@@ -1,8 +1,6 @@
-﻿using MassTransit;
-using MediatR;
+﻿using MediatR;
 using Orders.Application.DTOs;
 using Orders.Domain.Entities;
-using Orders.Domain.Events;
 using Orders.Domain.Repositories;
 
 namespace Orders.Application.Commands;

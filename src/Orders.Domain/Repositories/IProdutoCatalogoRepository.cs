@@ -7,4 +7,5 @@ public interface IProdutoCatalogoRepository
     Task<IEnumerable<ProdutoCatalogo>> ObterTodosAsync();
     Task AdicionarAsync(ProdutoCatalogo produto);
     Task AtualizarAsync(ProdutoCatalogo produto);
+    Task RemoverAsync(ProdutoCatalogo produto);
 }

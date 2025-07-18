@@ -37,4 +37,9 @@ internal class ProdutoCatalogoRepository : IProdutoCatalogoRepository
             .FirstOrDefaultAsync(p => p.Id == id);
     }
 
+    public Task RemoverAsync(ProdutoCatalogo produto)
+    {
+        _dbContext.ProdutosCatalogo.Remove(produto);
+        return Task.CompletedTask;
+    }
 }
