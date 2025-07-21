@@ -27,7 +27,6 @@ internal class PedidoRepository : IPedidoRepository
     public async Task<Pedido?> ObterPorIdAsync(Guid id)
     {
         return await _dbContext.Pedidos
-            .AsNoTracking()
             .Include(p => p.Itens)
             .FirstOrDefaultAsync(p => p.Id == id);
     }
@@ -35,7 +34,6 @@ internal class PedidoRepository : IPedidoRepository
     public async Task<IEnumerable<Pedido>> ObterPorClienteAsync(Guid clienteId)
     {
         return await _dbContext.Pedidos
-            .AsNoTracking()
             .Include(p => p.Itens)
             .Where(p => p.ClienteId == clienteId)
             .Take(100)
