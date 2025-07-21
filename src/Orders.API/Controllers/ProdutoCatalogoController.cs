@@ -32,7 +32,7 @@ public class ProdutoCatalogoController(IMediator _mediator) : ControllerBase
     /// <response code="400">Falha no processo</response>
     /// <response code="401">Funcionário não autenticado</response>    
     /// <response code="500">Erro inesperado</response>
-    [HttpGet("{categoria:string}")]
+    [HttpGet("{categoria}")]
     [Authorize(Roles = "cliente,gerente,atendente")]
     public async Task<IActionResult> ObterProdutosPorCategoria(string categoria)
     {
