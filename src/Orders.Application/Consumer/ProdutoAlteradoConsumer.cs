@@ -2,11 +2,6 @@
 using MassTransit;
 using Microsoft.Extensions.Logging;
 using Orders.Domain.Repositories;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Orders.Application.Consumer;
 public class ProdutoAlteradoConsumer : IConsumer<IProdutoAtualizadoEvent>
