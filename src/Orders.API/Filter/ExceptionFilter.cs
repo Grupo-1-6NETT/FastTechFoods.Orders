@@ -11,6 +11,12 @@ public class ExceptionFilter : IExceptionFilter
 
         switch (context.Exception)
         {
+            case InvalidOperationException:
+                problemDetails.Status = StatusCodes.Status400BadRequest;
+                problemDetails.Title = "Operação inválida";
+                problemDetails.Detail = context.Exception.Message;
+                break;
+
             case UnauthorizedAccessException:
                 problemDetails.Status = StatusCodes.Status401Unauthorized;
                 problemDetails.Title = "Não autenticado";
