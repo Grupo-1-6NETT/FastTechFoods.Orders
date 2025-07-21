@@ -28,6 +28,12 @@ public static class DependencyInjection
         services.AddMassTransit(x =>
         {
             x.AddConsumer<ProdutoCadastradoConsumer>();
+            x.AddConsumer<ProdutoAlteradoConsumer>();
+            x.AddConsumer<ProdutoRemovidoConsumer>();
+            x.AddConsumer<PedidoEmPreparoConsumer>();
+            x.AddConsumer<PedidoRejeitadoConsumer>();
+            x.AddConsumer<PedidoFinalizadoConsumer>();
+
             x.UsingRabbitMq((ctx, cfg) =>
             {
                 cfg.Host("rabbitmq", "/", h =>
@@ -39,6 +45,26 @@ public static class DependencyInjection
                 cfg.ReceiveEndpoint("produto-cadastrado-event", e =>
                 {
                     e.ConfigureConsumer<ProdutoCadastradoConsumer>(ctx);
+                });
+                cfg.ReceiveEndpoint("produto-alterado-event", e =>
+                {
+                    e.ConfigureConsumer<ProdutoAlteradoConsumer>(ctx);
+                });
+                cfg.ReceiveEndpoint("produto-removido-event", e =>
+                {
+                    e.ConfigureConsumer<ProdutoRemovidoConsumer>(ctx);
+                });
+                cfg.ReceiveEndpoint("pedido-empreparo-event", e =>
+                {
+                    e.ConfigureConsumer<PedidoEmPreparoConsumer>(ctx);
+                });
+                cfg.ReceiveEndpoint("pedido-rejeitado-event", e =>
+                {
+                    e.ConfigureConsumer<PedidoRejeitadoConsumer>(ctx);
+                });
+                cfg.ReceiveEndpoint("pedido-finalizado-event", e =>
+                {
+                    e.ConfigureConsumer<PedidoFinalizadoConsumer>(ctx);
                 });
             });
         });
